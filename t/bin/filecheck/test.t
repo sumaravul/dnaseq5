@@ -1,0 +1,76 @@
+#!/usr/bin/perl -w
+
+=head2
+
+APPLICATION		Json.t
+
+PURPOSE
+
+	TEST PACKAGE FileCheck
+
+
+USAGE
+
+    ./test.t [Int --log] [Int --printlog] [--help]
+
+		--log		Displayed log level (1-5)	
+		--printlog		Logfile log level (1-5)	
+		--help			Show this message
+
+=cut
+
+use Test::More	tests => 18;
+use Getopt::Long;
+use FindBin qw($Bin);
+use lib "$Bin/../../lib";
+use lib "$Bin/../../../lib";
+BEGIN
+{
+    my $installdir = $ENV{'installdir'} || "/dnaseq5";
+    unshift(@INC, "$installdir/lib");
+    unshift(@INC, "$installdir/lib/external/lib/perl5");
+}
+
+#### SET CONF FILE
+my $installdir  =   $ENV{'installdir'} || "/a";
+my $configfile  =   "$installdir/conf/config.yaml";
+
+BEGIN {
+    use_ok('FileCheck');
+}
+require_ok('FileCheck');
+
+#### INTERNAL MODULES
+use Test::FileCheck;
+
+#### MIXIN TO USE LOGGER
+use Moose::Util qw( apply_all_roles );
+
+#### GET OPTIONS
+my $log         =   2;
+my $printlog    =   5;
+my $help;
+GetOptions (
+    'log=i'     => \$log,
+    'printlog=i'    => \$printlog,
+    'help'          => \$help
+) or die "No options specified. Try '--help'\n";
+usage() if defined $help;
+
+my $object = Test::FileCheck->new({
+    logfile		=> $logfile,
+	inputfile	=>	$inputfile,
+	log			=>	$log,
+	printlog	=>	$printlog
+});
+
+#### READ, WRITE, SECTION ORDER AND CONTENTS
+$object->testCheck();
+
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#                                    SUBROUTINES
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+sub usage {
+    print `perldoc $0`;
+}
